@@ -1,9 +1,18 @@
 import React, {useState} from 'react';
-import {ActivityIndicator, SafeAreaView, StyleSheet, View} from 'react-native';
-import {ButtonGroup} from '../components/ButtonGroup';
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import {PanGestureHandler} from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 
+import {ButtonGroup} from '../components/ButtonGroup';
 import {CatCard, CatCardProps} from '../components/CatCard';
 import {SwitchTabs} from '../components/SwitchTabs';
+import {useAnimateCards} from '../hooks/useAnimateCards';
 import {useGetCatData} from '../hooks/useGetCatData';
 import {voteService} from '../services';
 
@@ -19,6 +28,17 @@ export const HomeScreen = () => {
   };
 
   const {catData, isLoading} = useGetCatData();
+  const {
+    currentItem,
+    nextItem,
+    slideCard,
+    currentItemAnimatedStyle,
+    nextItemAnimatedStyle,
+    likeAnimationStyle,
+    dislikeAnimationStyle,
+    gestureHandler,
+  } = useAnimateCards(catData, handleSwipeLeft, handleSwipeRight);
+
   return (
     <SafeAreaView style={{backgroundColor: '#FBFAFE'}}>
       <View style={styles.container}>
@@ -37,17 +57,42 @@ export const HomeScreen = () => {
             <ActivityIndicator />
           </View>
         ) : (
-          <View style={{width: '100%', height: '75%'}}>
-            <CatCard {...catData[0]} />
-          </View>
+          <>
+            <View style={styles.nextItemContainer}>
+              {nextItem && (
+                <Animated.View
+                  style={[nextItemAnimatedStyle, styles.animatedContainer]}>
+                  <CatCard {...nextItem} />
+                </Animated.View>
+              )}
+            </View>
+            {currentItem ? (
+              <PanGestureHandler onGestureEvent={gestureHandler}>
+                <Animated.View
+                  style={[currentItemAnimatedStyle, styles.animatedContainer]}>
+                  <CatCard
+                    {...currentItem}
+                    nextImage={nextItem?.image || {}}
+                    likeAnimationStyle={likeAnimationStyle}
+                    dislikeAnimationStyle={dislikeAnimationStyle}
+                  />
+                </Animated.View>
+              </PanGestureHandler>
+            ) : (
+              <View style={{height: 450, justifyContent: 'center'}}>
+                <Text>No more cats :(</Text>
+              </View>
+            )}
+          </>
         )}
         <ButtonGroup
           onPressLeft={() => {
-            handleSwipeLeft();
+            slideCard('left');
+            handleSwipeLeft(currentItem);
           }}
           onPressRight={() => {
             slideCard('right');
-            handleSwipeRight();
+            handleSwipeRight(currentItem);
           }}
         />
       </View>
