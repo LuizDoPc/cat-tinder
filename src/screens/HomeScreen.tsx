@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {ActivityIndicator, SafeAreaView, StyleSheet, View} from 'react-native';
+import {ButtonGroup} from '../components/ButtonGroup';
 
 import {CatCard, CatCardProps} from '../components/CatCard';
 import {SwitchTabs} from '../components/SwitchTabs';
@@ -40,6 +41,15 @@ export const HomeScreen = () => {
             <CatCard {...catData[0]} />
           </View>
         )}
+        <ButtonGroup
+          onPressLeft={() => {
+            handleSwipeLeft();
+          }}
+          onPressRight={() => {
+            slideCard('right');
+            handleSwipeRight();
+          }}
+        />
       </View>
     </SafeAreaView>
   );
